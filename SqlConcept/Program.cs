@@ -20,7 +20,8 @@ namespace SqlConcept {
             //string result = userDb.SelectUser();
             //string result = userDb.SelectUsersData();
             //string result = userDb.DataSetUser();
-            string result = userDb.CreateDataTable();
+            //string result = userDb.CreateDataTable();
+            string result = userDb.CloneCopyUser();
             Console.WriteLine(result);
 
 

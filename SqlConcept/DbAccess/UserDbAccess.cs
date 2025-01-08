@@ -258,11 +258,12 @@ namespace SqlConcept.DbAccess
                 dr["name"] = "Umar";
                 dr["MobileNumber"] = 9940395756;
                 dt.Rows.Add(dr);
-          
-                dt.Rows.Add(Guid.NewGuid(), "Farhan",9941753070);
-                
-                foreach(DataRow row in dt.Rows){
-                    Console.WriteLine(row["Id"]+" | "+ row["Name"] + " | "+ row["MobileNumber"]);
+
+                dt.Rows.Add(Guid.NewGuid(), "Farhan", 9941753070);
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    Console.WriteLine(row["Id"] + " | " + row["Name"] + " | " + row["MobileNumber"]);
                 }
             }
             catch (Exception e)
@@ -270,6 +271,71 @@ namespace SqlConcept.DbAccess
                 Console.WriteLine(e.Message);
             }
             return "Thank you";
+
+        }
+
+        public string CloneCopyUser()
+        {
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                try
+                {
+
+                    SqlDataAdapter adapter = new SqlDataAdapter("Select * from [user];", sqlConnection);
+                    DataTable orginalDataTable = new DataTable();
+
+                    adapter.Fill(orginalDataTable);
+                    Console.WriteLine("Orginal Data Table");
+
+                    foreach (DataRow row in orginalDataTable.Rows)
+                    {
+                        Console.WriteLine(row["Name"] + " , " + row["Email"]);
+                    }
+                    Console.WriteLine("\nUsing Data Set");
+
+                    DataTable copyDataTable = orginalDataTable.Copy();
+
+                    Console.WriteLine("\nUser copy Data Table \n");
+                    //Console.WriteLine(adapter.GetSchema());
+                    if (copyDataTable != null)
+                    {
+                        foreach (DataRow row in copyDataTable.Rows)
+                        {
+                            Console.WriteLine(row["Name"] + " , " + row["Email"]);
+                        }
+                    }
+                    Console.WriteLine("\nUser Clone Data Table \n");
+                    DataTable cloneDataTable = orginalDataTable.Clone();
+                    if (cloneDataTable.Rows.Count > 0)
+                    {
+                        foreach (DataRow row in cloneDataTable.Rows)
+                        {
+                            Console.WriteLine(row["Name"] + " , " + row["Email"]);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nAdding Data to cloneDataTable");
+                        cloneDataTable.Rows.Add(Guid.NewGuid(), "Senthil", "senthil@gmail.com", "senthil435");
+                        cloneDataTable.Rows.Add(Guid.NewGuid(), "Venkat", "venkat@gmail.com", "venkat435");
+                        foreach (DataRow row in cloneDataTable.Rows)
+                        {
+                            Console.WriteLine(row["Name"] + " , " + row["Email"]);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    return "Error Ocurred while Inserting user due to " + e.Message;
+                }
+                finally
+                {
+                    sqlConnection.Close();
+                }
+                return "NotFound";
+
+            }
+
 
         }
     }
