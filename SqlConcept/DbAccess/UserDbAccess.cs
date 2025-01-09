@@ -866,10 +866,10 @@ namespace SqlConcept.DbAccess
                 TranformTableToUser tranformTableToUser = new TranformTableToUser();
                 DataTable newTable = tranformTableToUser.TranformTableUser(userTable.Tables[0]);
 
-                foreach (DataRow row in newTable.Rows)
-                {
-                    Console.WriteLine($"Id: {row["UserId"]},    Name: {row["Name"]},    Email: {row["Email"]},");
-                }
+                //foreach (DataRow row in newTable.Rows)
+                //{
+                //    Console.WriteLine($"Id: {row["UserId"]},    Name: {row["Name"]},    Email: {row["Email"]},");
+                //}
 
                 try
                 {
@@ -899,8 +899,9 @@ namespace SqlConcept.DbAccess
                             if (transaction != null)
                             {
                                 transaction.Rollback();
+                                Console.WriteLine("Roll back Due to "+e.Message);
                             }
-                            Console.WriteLine(e.Message);
+                  
                         }
                     }
 
