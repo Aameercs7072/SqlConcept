@@ -36,8 +36,10 @@ namespace SqlConcept
             //string result = userDb.DataViewGetUser();
             //string result = userDb.BulkDataUser();
             //string result = userDb.BatchUsers();
-            string result = userDb.SqlBuilder();
-            Console.WriteLine(result);
+            //string result = userDb.SqlBuilder();
+
+            //Console.WriteLine(result);
+            userDb.TransformTable();
 
 
 

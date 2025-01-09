@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
+
 //using System.Data.SqlClient;
 using Microsoft.Data.SqlClient;
 using Microsoft.Identity.Client;
@@ -437,7 +441,8 @@ namespace SqlConcept.DbAccess
             return "Thank you";
 
         }
-        //Using StoreProcedure
+
+        /*Using StoreProcedure*/
         public string SelectUserDataSet(Guid id)
         {
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -743,7 +748,7 @@ namespace SqlConcept.DbAccess
                                 adapter.InsertCommand.Parameters.Add("@CreatedOn", SqlDbType.DateTime, 8, "createdOn");
                                 adapter.InsertCommand.UpdatedRowSource = UpdateRowSource.None;
                                 adapter.UpdateBatchSize = batchSize;
-                              
+
                                 adapter.Update(newData);
                                 sqlTransaction.Commit();
                                 Console.WriteLine("Batch Inserted Succesfully");
@@ -797,13 +802,14 @@ namespace SqlConcept.DbAccess
             string connectionString = "Server=.;Database=EmployeeDB;User Id=system;Password=sqlserver;TrustServerCertificate=true;";
             try
             {
-                using (SqlConnection sqlConnection=new SqlConnection(connectionString))
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
-                    SqlDataAdapter dataAdapter = new SqlDataAdapter("Select * from Employee where Department ='IT'",sqlConnection);
+                    SqlDataAdapter dataAdapter = new SqlDataAdapter("Select * from Employee where Department ='IT'", sqlConnection);
                     SqlCommandBuilder builder = new SqlCommandBuilder(dataAdapter);
                     DataSet dataSet = new DataSet();
                     dataAdapter.Fill(dataSet);
-                    foreach(DataRow row in dataSet.Tables[0].Rows){
+                    foreach (DataRow row in dataSet.Tables[0].Rows)
+                    {
                         Console.WriteLine($"Id: {row["Id"]}");
                     }
                     DataRow dataRow = dataSet.Tables[0].Rows[0];
@@ -821,7 +827,7 @@ namespace SqlConcept.DbAccess
                         Console.WriteLine($"{rowupdated} row updated");
                     }
                     DataTable table = dataSet.Tables[0];
-                    DataRow newRow= table.NewRow();
+                    DataRow newRow = table.NewRow();
                     newRow["Id"] = Guid.NewGuid();
                     newRow["Name"] = "Senthil";
                     newRow["Email"] = "senthil @gmail.com";
@@ -842,11 +848,109 @@ namespace SqlConcept.DbAccess
                     }
                 }
             }
-            catch (Exception e) { 
+            catch (Exception e)
+            {
                 Console.WriteLine(e.Message);
             }
             return "Thankyou";
         }
-    }
 
+        public void TransformTable()
+        {
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                SqlDataAdapter dataAdapter = new SqlDataAdapter("Select * from [User];Select * from NewUser", sqlConnection);
+                DataSet userTable = new DataSet();
+                dataAdapter.Fill(userTable);
+
+                TranformTableToUser tranformTableToUser = new TranformTableToUser();
+                DataTable newTable = tranformTableToUser.TranformTableUser(userTable.Tables[0]);
+
+                foreach (DataRow row in newTable.Rows)
+                {
+                    Console.WriteLine($"Id: {row["UserId"]},    Name: {row["Name"]},    Email: {row["Email"]},");
+                }
+
+                try
+                {
+                    sqlConnection.Open();
+
+                    using (SqlTransaction transaction = sqlConnection.BeginTransaction())
+                    {
+                        try
+                        {
+                           
+                            SqlDataAdapter newAdapter = new SqlDataAdapter();
+                            string insertQuery = "Insert into NewUser (UserId,Name,Email) Values (@id,@name,@email)";
+                            newAdapter.InsertCommand=new SqlCommand(insertQuery,sqlConnection,transaction);
+                            newAdapter.InsertCommand.Parameters.Add("@id",SqlDbType.Int,100,"UserId");
+                            newAdapter.InsertCommand.Parameters.Add("@name", SqlDbType.NVarChar,100,"Name");
+                            newAdapter.InsertCommand.Parameters.Add("@email", SqlDbType.NVarChar,100,"Email");
+                            newAdapter.InsertCommand.UpdatedRowSource = UpdateRowSource.None;
+                            newAdapter.UpdateBatchSize = 2;
+                         
+                            newAdapter.Update(newTable);
+                            transaction.Commit();
+                            Console.WriteLine("Users are Transformed Successfully To the New Table");
+
+                        }
+                        catch(Exception e)
+                        {
+                            if (transaction != null)
+                            {
+                                transaction.Rollback();
+                            }
+                            Console.WriteLine(e.Message);
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+
+
+            }
+        }
+    }
+    public class TranformTableToUser
+    {
+        public DataTable  TranformTableUser(DataTable usertable)
+        {
+            DataTable newTable = new DataTable();
+            DataColumn id = new DataColumn("UserId");
+            id.DataType = typeof(int);
+            id.AllowDBNull = false;
+            id.Unique = true;
+            id.AutoIncrement = true;
+            id.AutoIncrementSeed = 1;
+            id.AutoIncrementStep = 1;
+            newTable.Columns.Add(id);
+            DataColumn name = new DataColumn("Name");
+            name.DataType = typeof(string);
+            name.AllowDBNull = false;
+            name.MaxLength = 100;
+            newTable.Columns.Add(name);
+
+            DataColumn email = new DataColumn("Email");
+            email.DataType = typeof(string);
+            email.AllowDBNull = false;
+            email.Unique = true;
+            email.MaxLength = 100;
+            newTable.Columns.Add(email);
+
+            foreach (DataRow row in usertable.Rows)
+            {
+                DataRow newRow = newTable.NewRow();
+             
+                newRow["Name"] = row["Name"];
+                newRow["Email"] = row["Email"];
+
+                newTable.Rows.Add(newRow);
+            }
+
+            return newTable;
+        }
+    }
 }
