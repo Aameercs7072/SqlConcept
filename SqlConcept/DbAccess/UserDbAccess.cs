@@ -19,7 +19,8 @@ namespace SqlConcept.DbAccess
     internal class UserDbAccess
     {
 
-        string connectionString = "Server=.;Database=UserDb;User Id=system;Password=sqlserver;TrustServerCertificate=true;";
+        string connectionString = 
+            
 
         public string CreateTable()
         {
