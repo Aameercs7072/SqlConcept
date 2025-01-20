@@ -262,10 +262,10 @@ namespace SqlConcept.DbAccess
                 DataRow dr = dt.NewRow();
                 dr["id"] = Guid.NewGuid();
                 dr["name"] = "Umar";
-                dr["MobileNumber"] = 9940395756;
+                dr["MobileNumber"] = 123456789;
                 dt.Rows.Add(dr);
 
-                dt.Rows.Add(Guid.NewGuid(), "Farhan", 9941753070);
+                dt.Rows.Add(Guid.NewGuid(), "Farhan", 9876543210);
 
                 foreach (DataRow row in dt.Rows)
                 {
@@ -377,8 +377,8 @@ namespace SqlConcept.DbAccess
                 customerdt.PrimaryKey = new DataColumn[] { id };
                 Guid id1 = Guid.NewGuid();
                 Guid id2 = Guid.NewGuid();
-                customerdt.Rows.Add(id1, "Farhan", 9941753070);
-                customerdt.Rows.Add(id2, "Umar", 9940395756);
+                customerdt.Rows.Add(id1, "Farhan", 3143124343);
+                customerdt.Rows.Add(id2, "Umar", 998765446);
 
                 DataTable orderdt = new DataTable("Order");
 
@@ -517,7 +517,7 @@ namespace SqlConcept.DbAccess
                     DataRowView newRow = dataView2.AddNew();
                     newRow["Id"] = 108;
                     newRow["Name"] = "Aameer";
-                    newRow["Mobile"] = "9940395756";
+                    newRow["Mobile"] = "1234678890";
                     newRow["Age"] = 20;
                     newRow["Salary"] = 10000;
                     newRow["Department"] = "IT";
